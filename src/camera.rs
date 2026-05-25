@@ -11,6 +11,12 @@ pub struct Camera{
     z_near: f32,
     z_far: f32,
 }
+impl Default for Camera {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Camera {
     pub fn new()->Self{
         Self {
@@ -24,12 +30,12 @@ impl Camera {
         }
     }
     pub fn build_view_matrix(&self) -> cgmath::Matrix4<f32> {
-        let view = cgmath::Matrix4::look_at_rh(self.eye, self.target, self.up);
-        view
+        
+        cgmath::Matrix4::look_at_rh(self.eye, self.target, self.up)
     }
     pub fn build_proj_matrix(&self) -> cgmath::Matrix4<f32> {
-        let proj = cgmath::perspective(cgmath::Deg(self.fov_y), self.aspect, self.z_near, self.z_far);
-        proj
+        
+        cgmath::perspective(cgmath::Deg(self.fov_y), self.aspect, self.z_near, self.z_far)
     }
 }
 #[repr(C)]

@@ -1,5 +1,5 @@
 [package]
-name = "easy-gpu"
+name = "particles_2"
 version = "0.1.0"
 edition = "2024"
 
@@ -8,7 +8,7 @@ pollster = "0.4.0"
 winit = "0.30.13"
 bytemuck = "1.25.0"
 glam = "0.32.1"
-easy-gpu = "0.1.0"
+easy-gpu = "0.5.0"
 simdnoise = "3.1.6"
 cgmath = "0.18.0"
 rayon = "1.12.0"

@@ -2,14 +2,12 @@ use std::sync::Arc;
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
-use winit::window::{Window, WindowId};
-use crate::render::Render;
-use crate::simulation::Simulation;
+use winit::window::{Fullscreen, Window, WindowId};
+use crate::particles::Render;
 
 pub struct App{
     window: Option<Arc<Window>>,
     renderer: Option<Render>,
-    simulation: Option<Simulation>,
 }
 
 impl App{
@@ -17,7 +15,6 @@ impl App{
         Self{
             window: None,
             renderer: None,
-            simulation: None,
         }
     }
 }
@@ -26,20 +23,18 @@ impl ApplicationHandler for App{
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let window = Arc::new(
             event_loop
-                .create_window(Window::default_attributes())
+                .create_window(Window::default_attributes().with_fullscreen(Some(Fullscreen::Borderless(None))))
                 .unwrap(),
         );
 
-        let (renderer,simulation) = Render::new(window.clone());
+        let renderer = Render::new(window.clone());
 
         self.window = Some(window);
         self.renderer = Some(renderer);
-        self.simulation = Some(simulation);
     }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _window_id: WindowId, event: WindowEvent)  {
         let renderer = self.renderer.as_mut().unwrap();
-        let simulation = self.simulation.as_mut().unwrap();
         let _window = self.window.as_mut().unwrap();
 
         renderer.update_camera(&event);
@@ -54,18 +49,7 @@ impl ApplicationHandler for App{
             }
 
             WindowEvent::RedrawRequested => {
-                let frame = renderer.core.begin_frame();
-
-                simulation.compute(frame);
-                
-                frame.draw(
-                    simulation.particles,
-                    renderer.material,
-                    renderer.mesh,
-                    0..simulation.num_particles
-                );
-
-                renderer.core.render();
+                renderer.update();
             }
 
             _ => {}

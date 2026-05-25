@@ -4,8 +4,7 @@ use crate::app::App;
 
 mod app;
 pub mod camera;
-mod render;
-mod simulation;
+mod particles;
 
 fn main() -> Result<(),EventLoopError> {
     let event_loop = EventLoop::new()?;

@@ -60,34 +60,37 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     return vec4<f32>(in.colour,a);
 }
 
-struct Particle {
-  position : vec3<f32>,
-  colour: vec3<f32>,
-  velocity: vec3<f32>,
-}
 
-@binding(0) @group(0) var<storage, read_write> particles: array<Particle>;
+@group(0) @binding(0) var<storage, read_write> positions: array<vec3<f32>>;
+@group(0) @binding(1) var<storage, read_write> velocities: array<vec3<f32>>;
+@group(0) @binding(2) var<storage, read_write> colours: array<vec3<f32>>;
 
 @compute @workgroup_size(256)
 fn cs_main(@builtin(global_invocation_id) global_id : vec3<u32>){
-    var particle = particles[global_id.x];
+    var velocity = velocities[global_id.x];
+    var position = positions[global_id.x];
 
-    let flow = normalize(curl_noise(particle.position * 0.01));
-    particle.velocity = mix(particle.velocity, flow , 0.1);
-    particle.velocity *= 0.96;
-    particle.position += particle.velocity * 2.0;
+    let flow = normalize(curl_noise(position * 0.01));
+    velocity = mix(velocity, flow , 0.01);
+    velocity *= 0.96;
+    position += velocity * 2.0;
+
+    velocities[global_id.x] = velocity;
+    positions[global_id.x] = position;
+
+    var colour = colours[global_id.x];
 
     let t = dot(flow, vec3<f32>(0.0, 1.0, 0.0)) * 0.5 + 0.5;
-    let purple = vec3<f32>(0.0, 0.1, 1.0);
-    let orange = vec3<f32>(1.0, 0.1, 0.0);
-    let col = mix(purple, orange, t);
-    particle.colour = mix(particle.colour,col,0.01);
+    let col1 = vec3<f32>(0.4, 0.05, 0.5);
+    let col2 = vec3<f32>(1.0, 0.4, 0.0);
+    let col = mix(col1, col2, t);
+    colour = mix(colour,col,0.01);
 
-    particles[global_id.x] = particle;
+    colours[global_id.x] = colour;
 }
 
 fn curl_noise(p: vec3<f32>) -> vec3<f32> {
-    let e = 0.01;
+    let e = 0.001;
 
     let dx = vec3<f32>(e, 0.0, 0.0);
     let dy = vec3<f32>(0.0, e, 0.0);
